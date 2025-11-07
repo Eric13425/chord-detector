@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎶 簡易版和弦偵測</title>
+</head>
+<body>
+  <h1>🎵 簡易版 Chord Detector</h1>
+
+  <p>請選擇一個音樂檔案（mp3 或 wav）：</p>
+  <input type="file" id="audioFile" accept="audio/*" />
+  <button id="uploadBtn">開始偵測</button>
+
+  <p id="result"></p>
+
+  <script>
+    document.getElementById("uploadBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById("audioFile");
+      const result = document.getElementById("result");
+
+      if (!fileInput.files.length) {
+        alert("請先選擇音訊檔案！");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      result.textContent = "🎧 分析中，請稍候...";
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/detect-chords", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("伺服器回應錯誤");
+        }
+
+        const data = await response.json();
+        result.textContent = "🎸 偵測到的和弦是：" + data.detected_chord;
+      } catch (error) {
+        result.textContent = "⚠️ 無法偵測，請確認後端伺服器是否啟動。";
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
